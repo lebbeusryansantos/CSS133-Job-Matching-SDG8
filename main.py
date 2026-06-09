@@ -1,47 +1,86 @@
 import pandas as pd
-import time
-import tracemalloc
-# 1. Import Team Beta's optimized function
-from gale_shapley import run_gale_shapley
+import time         # QUESTION: Why import time? ANSWER: To act as a stopwatch so we can measure execution speed!
+import tracemalloc  # QUESTION: Why tracemalloc? ANSWER: To track exactly how much RAM (memory) our algorithms eat up.
+
+# 1. Import the algorithms from our modular team files!
+# Keeping code in separate files (Separation of Concerns) makes our project clean and easy to read.
+from team_alpha import run_greedy_matching
+from team_beta import run_gale_shapley
 
 def load_data(n_size):
-    """Loads the synthetic datasets based on the requested batch size."""
-    print(f"Loading datasets for N={n_size}...")
+    """
+    Loads our synthetic datasets based on the requested size.
+    QUESTION: Why pass 'n_size' as a variable?
+    ANSWER: It allows us to dynamically load the N=100, 500, or 2500 CSVs without hardcoding the file names!
+    """
     applicants_df = pd.read_csv(f"applicants_N{n_size}.csv")
     jobs_df = pd.read_csv(f"jobs_N{n_size}.csv")
     return applicants_df, jobs_df
 
 def main():
-    # 1. Load the initial data (Change 500 to 100 or 2500 to test different sizes)
-    applicants, jobs = load_data(2500)
-    print("Data loaded successfully!")
+    # We define the three dataset sizes we want to test to see how our algorithms scale.
+    batch_sizes = [100, 500, 2500]
 
-    # --- TEAM ALPHA: SORTING & GREEDY ALGORITHM GOES HERE ---
-    print("\nStarting Greedy Algorithm...")
-    # TODO: Implement Matching Score & Sorting
-    # TODO: Implement Greedy Matching
-    
-    # --- TEAM BETA: GALE-SHAPLEY STABLE MATCHING GOES HERE ---
-    print("\nStarting Gale-Shapley Algorithm...")
-    
-    # Start performance metrics tracking
-    start_time = time.time()
-    tracemalloc.start()
-    
-    # Call your optimized algorithm using the loaded data
-    engagements = run_gale_shapley(applicants, jobs)
-    
-    # Stop performance metrics tracking
-    current, peak = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
-    end_time = time.time()
-    
-    # Print benchmarks and final matching results
-    print("Gale-Shapley Matching complete!")
-    print(f"Execution Time: {end_time - start_time:.4f} seconds")
-    print(f"Peak Memory Usage: {peak / 10**6:.2f} MB")
-    print("\nFinal Stable Engagements:")
-    print(engagements)
-    
+    # QUESTION: Why use a loop here?
+    # ANSWER: So the computer automatically runs all our empirical tests back-to-back. No manual editing required!
+    for n_size in batch_sizes:
+        print(f"\n{'='*60}")
+        print(f"🚀 RUNNING EMPIRICAL TESTS FOR DATASET SIZE: N = {n_size}")
+        print(f"{'='*60}")
+
+        # Step 1: Load the data into memory
+        applicants, jobs = load_data(n_size)
+        print("Data loaded successfully! Let's see how the algorithms handle it.\n")
+
+        # =====================================================================
+        # --- TEAM ALPHA: GREEDY ALGORITHM ---
+        # Hypothesis: This O(n log n) algorithm will be incredibly fast and 
+        # use very little memory, but it might leave a lot of people unmatched.
+        # =====================================================================
+        print("--- [ Team Alpha: Greedy Algorithm ] ---")
+        
+        start_time_alpha = time.time()  # Start the stopwatch
+        tracemalloc.start()             # Start recording RAM usage
+        
+        # Execute the matching logic
+        greedy_matches = run_greedy_matching(applicants, jobs)
+        
+        # Stop tracking metrics
+        current_alpha, peak_alpha = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+        end_time_alpha = time.time()
+        
+        # Print the final data for our research paper
+        print(f"Execution Time    : {end_time_alpha - start_time_alpha:.4f} seconds")
+        print(f"Peak Memory Usage : {peak_alpha / 10**6:.2f} MB")
+        print(f"Total Matches Made: {len(greedy_matches)} out of {n_size}\n")
+        
+        
+        # =====================================================================
+        # --- TEAM BETA: GALE-SHAPLEY STABLE MATCHING ---
+        # Hypothesis: This O(n^2) algorithm guarantees a 100% stable match rate,
+        # but the tradeoff is that it will consume significantly more time and memory.
+        # =====================================================================
+        print("--- [ Team Beta: Gale-Shapley Stable Matching ] ---")
+        
+        start_time_beta = time.time()   # Start the stopwatch
+        tracemalloc.start()             # Start recording RAM usage
+        
+        # Execute the matching logic
+        gs_matches = run_gale_shapley(applicants, jobs)
+        
+        # Stop tracking metrics
+        current_beta, peak_beta = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+        end_time_beta = time.time()
+        
+        # Print the final data for our research paper
+        print(f"Execution Time    : {end_time_beta - start_time_beta:.4f} seconds")
+        print(f"Peak Memory Usage : {peak_beta / 10**6:.2f} MB")
+        print(f"Total Matches Made: {len(gs_matches)} out of {n_size}")
+        print(f"{'-'*60}\n")
+
+# This is the standard entry point for Python scripts. 
+# It tells Python to run the main() function only if this file is executed directly.
 if __name__ == "__main__":
     main()
