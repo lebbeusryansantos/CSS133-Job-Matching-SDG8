@@ -35,6 +35,7 @@ We separated responsibilities to keep the codebase clean, modular, and easy to m
 | `team_alpha.py` | Contains the Greedy matching algorithm implementation. |
 | `team_beta.py` | Contains the Gale-Shapley Stable Matching algorithm and Match Stability Auditor. |
 | `*.csv` | Synthetic applicant and job datasets across varying dataset sizes. |
+| `Graphs.py` | Comparing of the results made by two teams. |
 
 ---
 
